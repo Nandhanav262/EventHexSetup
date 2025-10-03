@@ -1,5 +1,6 @@
 package ticket; 
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.Set;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -157,18 +158,55 @@ public class Ticket extends Base
                       //  System.out.println("Registartion successfully!");
              
                  // Close the registration tab
-                    String originalWindow1 = driver.getWindowHandle();
+                    Set<String> windowHandles = driver.getWindowHandles();
+                    Iterator<String> it = windowHandles.iterator();
+                    String mainWindow = it.next();
+                    String registrationWindow = it.next();
+                    driver.switchTo().window(registrationWindow);
                     driver.close();
-                    System.out.println("Closed the registration tab");
-                    driver.switchTo().window(originalWindow1);
+                    driver.switchTo().window(mainWindow);
+                    System.out.println("Registration tab closed");
+                 
+                 // Wait until the Form Builder button is clickable
+                    WebElement formBuilderBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[.//span[text()='Form Builder']]")));
+                    formBuilderBtn.click();
+                    System.out.println("Clicked on Form Builder");
+                    
+
+                 // Wait until the Submissions tab is clickable
                     WebDriverWait wait1 = new WebDriverWait(driver, Duration.ofSeconds(20));
-                    wait1.until(ExpectedConditions.urlContains("/configure/ticket"));
-                    System.out.println("Switched back to ticket configuration page");;
-          
-              //Click form builder button   
-                    WebElement formBuilder = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@class='sc-dKKIkQ jvjGPx edit menu callBack button']")));
-                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", formBuilder);
-	} 
+                    WebElement submissionsBtn = wait1.until(ExpectedConditions.elementToBeClickable(
+                            By.xpath("//*[@id=\"root\"]/div/div[2]/div/div[1]/div[2]/div/div[1]")
+                    ));
+
+                    // Click Submissions using JavaScript
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submissionsBtn);
+                    System.out.println("Clicked Submissions");
+                    
+                 // Wait for and tick the 'Send confirmation email' checkbox
+                    WebElement sendConfirmation = wait.until(ExpectedConditions.elementToBeClickable(
+                            By.xpath("//label[contains(.,'Send confirmation email')]/preceding-sibling::input[@type='checkbox']")));
+                    if (!sendConfirmation.isSelected()) {
+                        sendConfirmation.click();
+                    }
+                    System.out.println("Send confirmation email checkbox selected");
+
+                    // Wait for and tick the 'Attach badge/ticket' checkbox
+                    WebElement attachBadge = wait.until(ExpectedConditions.elementToBeClickable(
+                            By.xpath("//label[contains(.,'Attach badge/ticket')]/preceding-sibling::input[@type='checkbox']")));
+                    if (!attachBadge.isSelected()) {
+                        attachBadge.click();
+                    }
+                    System.out.println("Attach badge/ticket checkbox selected");
+
+                    // Click 'Save & Close' button
+                    WebElement saveCloseBtn = wait.until(ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[contains(.,'Save & Close')]")));
+                    saveCloseBtn.click();
+                    System.out.println("Clicked Save & Close button");
+
+                    
+ } 				
 	
 
 	public static void main(String[] args) 
@@ -176,6 +214,6 @@ public class Ticket extends Base
 	Ticket login=new Ticket(); 
 	login.initialize_Browse(); 
 	login. loginCredentials(); 
-    // login.driver_QuitandClose(); } }
+    //login.driver_QuitandClose();
 }
 }
